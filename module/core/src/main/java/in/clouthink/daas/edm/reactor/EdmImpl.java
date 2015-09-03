@@ -2,19 +2,19 @@ package in.clouthink.daas.edm.reactor;
 
 import static reactor.bus.selector.Selectors.$;
 
-import in.clouthink.daas.edm.Listenable;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import reactor.Environment;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.fn.Consumer;
 import in.clouthink.daas.edm.Edm;
-import in.clouthink.daas.edm.EventHandler;
+import in.clouthink.daas.edm.EventListener;
+import in.clouthink.daas.edm.Listenable;
 
 /**
  */
@@ -22,27 +22,27 @@ public class EdmImpl implements Edm {
     
     private static final Log logger = LogFactory.getLog(EdmImpl.class);
     
-    public static class ConsumerAdatper implements Consumer<Event> {
+    public static class DefaultConsumerAdatper implements Consumer<Event> {
         
-        private EventHandler eventHandler;
+        private EventListener eventEventListener;
         
-        public ConsumerAdatper(EventHandler eventHandler) {
-            this.eventHandler = eventHandler;
+        public DefaultConsumerAdatper(EventListener eventEventListener) {
+            this.eventEventListener = eventEventListener;
         }
         
         public void accept(Event t) {
-            eventHandler.handle(t.getData());
+            eventEventListener.onEvent(t.getData());
         }
         
     }
     
-    public static class ConsumerAdatper2 implements Consumer<Event> {
+    public static class ReflectedConsumerAdatper implements Consumer<Event> {
         
         private Object target;
         
         private Method method;
         
-        public ConsumerAdatper2(Object target, Method method) {
+        public ReflectedConsumerAdatper(Object target, Method method) {
             this.target = target;
             this.method = method;
         }
@@ -81,14 +81,15 @@ public class EdmImpl implements Edm {
         if (eventHandler == null) {
             throw new NullPointerException();
         }
-        if (eventHandler instanceof EventHandler) {
+        if (eventHandler instanceof EventListener) {
             r.<Event> on($(eventName),
-                         new ConsumerAdatper((EventHandler) eventHandler));
+                         new DefaultConsumerAdatper((EventListener) eventHandler));
             return;
         }
         
         Method method = resolveMethod(eventHandler);
-        r.<Event> on($(eventName), new ConsumerAdatper2(eventHandler, method));
+        r.<Event> on($(eventName),
+                     new ReflectedConsumerAdatper(eventHandler, method));
     }
     
     private Method resolveMethod(Object listener) {
@@ -119,7 +120,6 @@ public class EdmImpl implements Edm {
         }
         
         return result;
-        
     }
     
     @Override
