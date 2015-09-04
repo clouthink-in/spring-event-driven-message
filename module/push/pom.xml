@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>in.clouthink.daas</groupId>
-    <artifactId>daas-edm-jpush</artifactId>
+    <artifactId>daas-edm-push</artifactId>
     <version>1.0.0.SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>daas-edm-jpush</name>
+    <name>daas-edm-push</name>
     <url>http://clouthink.in</url>
     <description>The lightweight event driven message framework based on reactor.</description>
 
