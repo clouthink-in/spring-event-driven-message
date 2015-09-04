@@ -5,6 +5,9 @@ target/
 .project
 .settings
 daas-edm.iml
+daas-edm-email.iml
+daas-edm-sms.iml
+daas-edm-push.iml
 
 *.class
 
