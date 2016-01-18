@@ -6,8 +6,7 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
-import in.clouthink.daas.edm.Listenable;
-import in.clouthink.daas.edm.sms.SmsMessage;
+import in.clouthink.daas.edm.sms.AdvancedSmsMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.*;
@@ -15,6 +14,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import in.clouthink.daas.edm.Listenable;
+import in.clouthink.daas.edm.sms.SmsMessage;
 import in.clouthink.daas.edm.sms.SmsSender;
 
 public class SmsSenderZhiyanImpl implements SmsSender {
@@ -141,6 +143,7 @@ public class SmsSenderZhiyanImpl implements SmsSender {
                                        cellphone,
                                        message));
             long timestamp = System.currentTimeMillis();
+            
             String sign = signByMd5(zhiyanOptions.getApiKey(),
                                     zhiyanOptions.getToken(),
                                     zhiyanOptions.getTemplateId(),
@@ -149,12 +152,12 @@ public class SmsSenderZhiyanImpl implements SmsSender {
                                     timestamp);
                                     
             String finalUrl = new StringBuilder(zhiyanOptions.getUrl()).append("?timestamp=")
-                                                                      .append(timestamp)
-                                                                      .append("&sign=")
-                                                                      .append(URLEncoder.encode(sign,
-                                                                                                "UTF-8"))
-                                                                      .toString();
-                                                                      
+                                                                       .append(timestamp)
+                                                                       .append("&sign=")
+                                                                       .append(URLEncoder.encode(sign,
+                                                                                                 "UTF-8"))
+                                                                       .toString();
+                                                                       
             HttpEntity<String> requestEntity = new HttpEntity(getRequestParamString(buildParams(cellphone,
                                                                                                 message)),
                                                               headers);
@@ -173,6 +176,12 @@ public class SmsSenderZhiyanImpl implements SmsSender {
         catch (Throwable e) {
             logger.error("Sending sms failed", e);
         }
+    }
+    
+    @Override
+    public void send(AdvancedSmsMessage smsMsg) {
+        logger.warn("Send AdvancedSmsMessage is not supported, the options from AdvancedSmsMessage will be ignored, and dispatch the normal SmsMessage Sender");
+        send(new SmsMessage(smsMsg.getCellphone(), smsMsg.getMessage()));
     }
     
 }

@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
+import in.clouthink.daas.edm.sms.AdvancedSmsMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.*;
@@ -164,6 +165,12 @@ public class SmsSenderWebChineseImpl implements SmsSender {
             logger.error("Sending sms failed", e);
         }
         
+    }
+    
+    @Override
+    public void send(AdvancedSmsMessage smsMsg) {
+        logger.warn("Send AdvancedSmsMessage is not supported, the options from AdvancedSmsMessage will be ignored, and dispatch the normal SmsMessage Sender");
+        send(new SmsMessage(smsMsg.getCellphone(), smsMsg.getMessage()));
     }
     
 }

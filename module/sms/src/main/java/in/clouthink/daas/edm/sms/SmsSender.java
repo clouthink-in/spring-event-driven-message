@@ -2,6 +2,8 @@ package in.clouthink.daas.edm.sms;
 
 public interface SmsSender {
     
-    public void send(SmsMessage smsMessage);
+    void send(SmsMessage smsMessage);
+    
+    <T> void send(AdvancedSmsMessage<T> smsMessage);
     
 }

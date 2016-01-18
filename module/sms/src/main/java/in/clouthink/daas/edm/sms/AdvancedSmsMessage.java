@@ -1,18 +1,12 @@
 package in.clouthink.daas.edm.sms;
 
-public class SmsMessage {
+public class AdvancedSmsMessage<T> {
     
     private String cellphone;
     
     private String message;
     
-    public SmsMessage() {
-    }
-    
-    public SmsMessage(String cellphone, String message) {
-        this.cellphone = cellphone;
-        this.message = message;
-    }
+    private T options;
     
     public String getCellphone() {
         return cellphone;
@@ -29,4 +23,13 @@ public class SmsMessage {
     public void setMessage(String message) {
         this.message = message;
     }
+    
+    public T getOptions() {
+        return options;
+    }
+    
+    public void setOptions(T options) {
+        this.options = options;
+    }
+    
 }
