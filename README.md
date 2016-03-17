@@ -8,7 +8,14 @@ The lightweight event driven message framework based on reactor.
 
 # Usage
 
-So far `FIXME` is available 
+So far the following version is available 
+
+module name | latest version
+------|------
+daas-edm|1.0.1
+daas-edm-email|1.0.0
+daas-edm-push|1.0.0
+daas-edm-sms|1.1.0
 
 ## Maven
 
@@ -16,6 +23,24 @@ So far `FIXME` is available
         <groupId>in.clouthink.daas</groupId>
         <artifactId>daas-edm</artifactId>
         <version>${daas.edm.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>in.clouthink.daas</groupId>
+        <artifactId>daas-edm-email</artifactId>
+        <version>${daas.edm.email.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>in.clouthink.daas</groupId>
+        <artifactId>daas-edm-push</artifactId>
+        <version>${daas.edm.push.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>in.clouthink.daas</groupId>
+        <artifactId>daas-edm-sms</artifactId>
+        <version>${daas.edm.sms.version}</version>
     </dependency>
 
 ## Gradle
