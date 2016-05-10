@@ -13,14 +13,13 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.fn.Consumer;
 import in.clouthink.daas.edm.Edm;
+import in.clouthink.daas.edm.EdmInstanceFactory;
 import in.clouthink.daas.edm.EventListener;
 import in.clouthink.daas.edm.Listenable;
 
 /**
  */
-public class EdmImpl implements Edm {
-    
-    private static final Log logger = LogFactory.getLog(EdmImpl.class);
+public class EdmImpl implements Edm, EdmInstanceFactory {
     
     public static class DefaultConsumerAdatper implements Consumer<Event> {
         
@@ -74,6 +73,11 @@ public class EdmImpl implements Edm {
     public EdmImpl() {
         Environment env = new Environment();
         r = EventBus.config().env(env).dispatcher(Environment.SHARED).get();
+    }
+    
+    @Override
+    public Edm newInstance() {
+        return new EdmImpl();
     }
     
     @Override
