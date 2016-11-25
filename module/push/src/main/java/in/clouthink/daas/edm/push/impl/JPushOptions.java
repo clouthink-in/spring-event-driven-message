@@ -1,10 +1,13 @@
 package in.clouthink.daas.edm.push.impl;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 /**
  * The jpush configuration
  *
  * @author dz
  */
+@ConfigurationProperties(prefix = "in.clouthink.daas.edm.push.impl")
 public class JPushOptions {
 
 	private String appKey;

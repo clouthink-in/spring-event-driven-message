@@ -10,6 +10,13 @@ import java.util.Map;
 public class PushMessage implements Serializable {
 
 	/**
+	 * id to track the message
+	 *
+	 * @since 1.0.1
+	 */
+	private String id;
+
+	/**
 	 * @since 1.0.1
 	 */
 	private PushWay pushWay;
@@ -35,6 +42,14 @@ public class PushMessage implements Serializable {
 	private String[] devices;
 
 	private Map<String,Object> attributes = new HashMap<String,Object>();
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public PushWay getPushWay() {
 		return pushWay;

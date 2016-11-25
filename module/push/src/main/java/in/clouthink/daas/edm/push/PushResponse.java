@@ -1,9 +1,13 @@
 package in.clouthink.daas.edm.push;
 
+import java.io.Serializable;
+
 /**
  * @since 1.0.1
  */
-public class PushResponse {
+public class PushResponse implements Serializable {
+
+	private PushMessage request;
 
 	private boolean success = false;
 
@@ -14,6 +18,14 @@ public class PushResponse {
 	private String errorCode;
 
 	private String errorMessage;
+
+	public PushMessage getRequest() {
+		return request;
+	}
+
+	public void setRequest(PushMessage request) {
+		this.request = request;
+	}
 
 	public boolean isSuccess() {
 		return success;

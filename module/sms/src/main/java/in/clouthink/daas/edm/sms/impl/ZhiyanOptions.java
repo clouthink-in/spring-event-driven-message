@@ -1,5 +1,8 @@
 package in.clouthink.daas.edm.sms.impl;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "in.clouthink.daas.edm.sms.zhiyan")
 public class ZhiyanOptions {
     
     String apiKey;

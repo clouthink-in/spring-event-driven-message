@@ -66,7 +66,8 @@ public class PushSenderJPushImpl implements PushSender {
 			throw new IllegalArgumentException("The push type is required.");
 		}
 		if (message.getPushWay() == null) {
-			throw new IllegalArgumentException("The push way is required.");
+			//notification by default
+			message.setPushWay(PushWay.Notification);
 		}
 
 		switch (message.getPushType()) {
@@ -97,34 +98,34 @@ public class PushSenderJPushImpl implements PushSender {
 
 	private void pushToAll(PushMessage message, PushResponseReceiver responseReceiver) {
 		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.all()).build();
-		doPush(payload, responseReceiver);
+		doPush(message, payload, responseReceiver);
 	}
 
 	@Deprecated
 	private void pushToGroup(PushMessage message, PushResponseReceiver responseReceiver) {
 		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.tag_and(message.getGroups())).build();
-		doPush(payload, responseReceiver);
+		doPush(message, payload, responseReceiver);
 	}
 
 	private void pushToTagOr(PushMessage message, PushResponseReceiver responseReceiver) {
 		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.tag(message.getTags())).build();
-		doPush(payload, responseReceiver);
+		doPush(message, payload, responseReceiver);
 	}
 
 	private void pushToTagAnd(PushMessage message, PushResponseReceiver responseReceiver) {
 		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.tag_and(message.getTags())).build();
-		doPush(payload, responseReceiver);
+		doPush(message, payload, responseReceiver);
 	}
 
 	private void pushToAlias(PushMessage message, PushResponseReceiver responseReceiver) {
 		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.alias(message.getAlias())).build();
-		doPush(payload, responseReceiver);
+		doPush(message, payload, responseReceiver);
 	}
 
 	@Deprecated
 	private void pushToDevice(PushMessage message, PushResponseReceiver responseReceiver) {
 		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.alias(message.getDevices())).build();
-		doPush(payload, responseReceiver);
+		doPush(message, payload, responseReceiver);
 	}
 
 	private PushPayload.Builder createPayloadBuilder(PushMessage message) {
@@ -232,11 +233,12 @@ public class PushSenderJPushImpl implements PushSender {
 		}
 	}
 
-	private void doPush(PushPayload payload, PushResponseReceiver responseReceiver) {
+	private void doPush(PushMessage message, PushPayload payload, PushResponseReceiver responseReceiver) {
 		if (payload == null) {
 			return;
 		}
 		PushResponse response = new PushResponse();
+		response.setRequest(message);
 		try {
 			PushResult result = pushClient.sendPush(payload);
 			response.setSuccess(result.isResultOK());
