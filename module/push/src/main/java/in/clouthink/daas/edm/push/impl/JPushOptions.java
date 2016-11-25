@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author dz
  */
-@ConfigurationProperties(prefix = "in.clouthink.daas.edm.push.impl")
+@ConfigurationProperties(prefix = "in.clouthink.daas.edm.push.jpush")
 public class JPushOptions {
 
 	private String appKey;

@@ -14,8 +14,8 @@ module name | latest version
 ------|------
 daas-edm|1.0.2
 daas-edm-email|1.0.0
-daas-edm-push|1.1.0
-daas-edm-sms|1.2.0
+daas-edm-push|1.1.1
+daas-edm-sms|1.2.1
 
 ## Maven
 
