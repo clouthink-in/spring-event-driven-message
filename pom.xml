@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>in.clouthink.daas</groupId>
+    <artifactId>daas-edm-project</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>daas-edm-project</name>
+    <url>http://clouthink.in</url>
+    <description>The lightweight event driven message framework based on reactor.</description>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>clouthink.in</name>
+            <email>clouthink.in@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git://git.coding.net/melthaw/daas-edm.git</connection>
+        <developerConnection>scm:git://git.coding.net/melthaw/daas-edm.git</developerConnection>
+        <url>git://git.coding.net/melthaw/daas-edm.git</url>
+    </scm>
+
+    <modules>
+        <module>module/core</module>
+        <module>module/email</module>
+        <module>module/push</module>
+        <module>module/sms</module>
+    </modules>
+
+</project>

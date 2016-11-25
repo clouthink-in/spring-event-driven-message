@@ -1,16 +1,10 @@
 package in.clouthink.daas.edm.push.impl;
 
-import com.google.gson.JsonObject;
-import in.clouthink.daas.edm.Listenable;
-import in.clouthink.daas.edm.push.PushMessage;
-import in.clouthink.daas.edm.push.PushSender;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import cn.jpush.api.common.resp.APIConnectionException;
 import cn.jpush.api.common.resp.APIRequestException;
 import cn.jpush.api.push.PushClient;
 import cn.jpush.api.push.PushResult;
+import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Options;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
@@ -18,152 +12,255 @@ import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
+import com.google.gson.JsonObject;
+import in.clouthink.daas.edm.Listenable;
+import in.clouthink.daas.edm.push.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 
+/**
+ * The jpush impl for push sender
+ *
+ * @author dz
+ */
 public class PushSenderJPushImpl implements PushSender {
-    
-    private static final Log logger = LogFactory.getLog(PushSenderJPushImpl.class);
-    
-    private JPushOptions jPushOptions;
-    
-    private PushClient pushClient;
-    
-    public PushSenderJPushImpl(JPushOptions jPushOptions) {
-        this.jPushOptions = jPushOptions;
-        this.pushClient = new PushClient(jPushOptions.getAppSecret(),
-                                         jPushOptions.getAppKey(),
-                                         jPushOptions.getMaxRetries());
-    }
-    
-    @Listenable
-    @Override
-    public void push(PushMessage message) {
-        if (message.getPushType() == null) {
-            throw new IllegalArgumentException("The push type is required.");
-        }
-        
-        switch (message.getPushType()) {
-            case All: {
-                pushToAll(message);
-                return;
-            }
-            case Group: {
-                pushToGroup(message);
-                return;
-            }
-            case Device: {
-                pushToDevice(message);
-            }
-        }
-        
-        return;
-    }
-    
-    private void pushToAll(PushMessage message) {
-        PushPayload payload = createPayloadBuilder(message).setAudience(Audience.all())
-                                                           .build();
-        push(payload);
-    }
-    
-    private void pushToGroup(PushMessage message) {
-        PushPayload payload = createPayloadBuilder(message).setAudience(Audience.tag_and(message.getGroups()))
-                                                           .build();
-        push(payload);
-    }
-    
-    private void pushToDevice(PushMessage message) {
-        PushPayload payload = createPayloadBuilder(message).setAudience(Audience.alias(message.getDevices()))
-                                                           .build();
-        push(payload);
-    }
-    
-    private PushPayload.Builder createPayloadBuilder(PushMessage message) {
-        IosNotification.Builder iosBuilder = IosNotification.newBuilder()
-                                                            .setAlert(message.getTitle())
-                                                            .incrBadge(1);
-        for (Map.Entry<String, Object> entry : message.getAttributes()
-                                                      .entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (value instanceof Number) {
-                iosBuilder.addExtra(key, (Number) value);
-            }
-            else if (value instanceof Boolean) {
-                iosBuilder.addExtra(key, (Boolean) value);
-            }
-            else if (value instanceof JsonObject) {
-                iosBuilder.addExtra(key, (JsonObject) value);
-            }
-            else if (value instanceof String) {
-                iosBuilder.addExtra(key, (String) value);
-            }
-            else {
-                iosBuilder.addExtra(key, value.toString());
-            }
-        }
-        IosNotification iosNotification = iosBuilder.addExtra("content",
-                                                              message.getContent())
-                                                    .build();
-                                                    
-        AndroidNotification.Builder androidBuilder = AndroidNotification.newBuilder()
-                                                                        .setAlert(message.getTitle());
-                                                                        
-        for (Map.Entry<String, Object> entry : message.getAttributes()
-                                                      .entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (value instanceof Number) {
-                androidBuilder.addExtra(key, (Number) value);
-            }
-            else if (value instanceof Boolean) {
-                androidBuilder.addExtra(key, (Boolean) value);
-            }
-            else if (value instanceof JsonObject) {
-                androidBuilder.addExtra(key, (JsonObject) value);
-            }
-            else if (value instanceof String) {
-                androidBuilder.addExtra(key, (String) value);
-            }
-            else {
-                androidBuilder.addExtra(key, value.toString());
-            }
-        }
-        
-        AndroidNotification androidNotification = androidBuilder.addExtra("content",
-                                                                          message.getContent())
-                                                                .build();
-                                                                
-        return PushPayload.newBuilder()
-                          .setPlatform(Platform.all())
-                          .setNotification(Notification.newBuilder()
-                                                       .addPlatformNotification(iosNotification)
-                                                       .addPlatformNotification(androidNotification)
-                                                       .build())
-                          .setOptions(Options.newBuilder()
-                                             .setTimeToLive(jPushOptions.getTimeToLive())
-                                             .setApnsProduction(jPushOptions.isApnsProduction())
-                                             .build());
-    }
-    
-    private void push(PushPayload payload) {
-        try {
-            PushResult result = pushClient.sendPush(payload);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Message sent, " + payload);
-                logger.debug("Got result, " + result);
-            }
-        }
-        catch (APIConnectionException e) {
-            logger.error(e, e);
-        }
-        catch (APIRequestException e) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("HTTP Status: " + e.getStatus());
-                logger.warn("Error Code: " + e.getErrorCode());
-                logger.warn("Error Message ", e);
-            }
-        }
-    }
-    
+
+	private static final Log logger = LogFactory.getLog(PushSenderJPushImpl.class);
+
+	private PushResponseReceiver receiver = new PushResponseReceiverImpl();
+
+	private JPushOptions jPushOptions;
+
+	private PushClient pushClient;
+
+	public PushSenderJPushImpl(JPushOptions jPushOptions) {
+		this.jPushOptions = jPushOptions;
+		this.pushClient = new PushClient(jPushOptions.getAppSecret(),
+										 jPushOptions.getAppKey(),
+										 jPushOptions.getMaxRetries());
+	}
+
+	/**
+	 * @param receiver
+	 * @since 1.0.1
+	 */
+	public void setPushResponseReceiver(PushResponseReceiver receiver) {
+		if (receiver == null) {
+			throw new NullPointerException();
+		}
+		this.receiver = receiver;
+	}
+
+	@Override
+	public void push(PushMessage message) {
+		//use the default receiver
+		push(message, receiver);
+	}
+
+	@Listenable
+	@Override
+	public void push(PushMessage message, PushResponseReceiver responseReceiver) {
+		if (message.getPushType() == null) {
+			throw new IllegalArgumentException("The push type is required.");
+		}
+		if (message.getPushWay() == null) {
+			throw new IllegalArgumentException("The push way is required.");
+		}
+
+		switch (message.getPushType()) {
+			case All: {
+				pushToAll(message, responseReceiver);
+				return;
+			}
+			case Group: {
+				pushToGroup(message, responseReceiver);
+				return;
+			}
+			case TagOr: {
+				pushToTagOr(message, responseReceiver);
+			}
+			case TagAnd: {
+				pushToTagAnd(message, responseReceiver);
+			}
+			case Alias: {
+				pushToAlias(message, responseReceiver);
+			}
+			case Device: {
+				pushToDevice(message, responseReceiver);
+			}
+		}
+
+		return;
+	}
+
+	private void pushToAll(PushMessage message, PushResponseReceiver responseReceiver) {
+		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.all()).build();
+		doPush(payload, responseReceiver);
+	}
+
+	@Deprecated
+	private void pushToGroup(PushMessage message, PushResponseReceiver responseReceiver) {
+		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.tag_and(message.getGroups())).build();
+		doPush(payload, responseReceiver);
+	}
+
+	private void pushToTagOr(PushMessage message, PushResponseReceiver responseReceiver) {
+		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.tag(message.getTags())).build();
+		doPush(payload, responseReceiver);
+	}
+
+	private void pushToTagAnd(PushMessage message, PushResponseReceiver responseReceiver) {
+		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.tag_and(message.getTags())).build();
+		doPush(payload, responseReceiver);
+	}
+
+	private void pushToAlias(PushMessage message, PushResponseReceiver responseReceiver) {
+		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.alias(message.getAlias())).build();
+		doPush(payload, responseReceiver);
+	}
+
+	@Deprecated
+	private void pushToDevice(PushMessage message, PushResponseReceiver responseReceiver) {
+		PushPayload payload = createPayloadBuilder(message).setAudience(Audience.alias(message.getDevices())).build();
+		doPush(payload, responseReceiver);
+	}
+
+	private PushPayload.Builder createPayloadBuilder(PushMessage message) {
+		if (message.getPushWay() == PushWay.Notification) {
+			IosNotification.Builder iosBuilder = IosNotification.newBuilder().setAlert(message.getTitle()).incrBadge(1);
+			processAttributes(message, iosBuilder);
+			IosNotification iosNotification = iosBuilder.addExtra("content", message.getContent()).build();
+
+			AndroidNotification.Builder androidBuilder = AndroidNotification.newBuilder().setAlert(message.getTitle());
+			processAttributes(message, androidBuilder);
+			AndroidNotification androidNotification = androidBuilder.addExtra("content", message.getContent()).build();
+
+			return PushPayload.newBuilder()
+							  .setPlatform(Platform.all())
+							  .setNotification(Notification.newBuilder()
+														   .addPlatformNotification(iosNotification)
+														   .addPlatformNotification(androidNotification)
+														   .build())
+							  .setOptions(Options.newBuilder()
+												 .setTimeToLive(jPushOptions.getTimeToLive())
+												 .setApnsProduction(jPushOptions.isApnsProduction())
+												 .build());
+		}
+		if (message.getPushWay() == PushWay.Message) {
+			Message.Builder msgBuilder = Message.newBuilder()
+												.setTitle(message.getTitle())
+												.setMsgContent(message.getContent());
+			processAttributes(message, msgBuilder);
+
+			return PushPayload.newBuilder()
+							  .setPlatform(Platform.all())
+							  .setMessage(msgBuilder.build())
+							  .setOptions(Options.newBuilder()
+												 .setTimeToLive(jPushOptions.getTimeToLive())
+												 .setApnsProduction(jPushOptions.isApnsProduction())
+												 .build());
+		}
+
+		return null;
+	}
+
+	private void processAttributes(PushMessage message, Message.Builder iosBuilder) {
+		for (Map.Entry<String,Object> entry : message.getAttributes().entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			if (value instanceof Number) {
+				iosBuilder.addExtra(key, (Number) value);
+			}
+			else if (value instanceof Boolean) {
+				iosBuilder.addExtra(key, (Boolean) value);
+			}
+			else if (value instanceof JsonObject) {
+				iosBuilder.addExtra(key, ((JsonObject) value).toString());
+			}
+			else if (value instanceof String) {
+				iosBuilder.addExtra(key, (String) value);
+			}
+			else {
+				iosBuilder.addExtra(key, value.toString());
+			}
+		}
+	}
+
+	private void processAttributes(PushMessage message, IosNotification.Builder iosBuilder) {
+		for (Map.Entry<String,Object> entry : message.getAttributes().entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			if (value instanceof Number) {
+				iosBuilder.addExtra(key, (Number) value);
+			}
+			else if (value instanceof Boolean) {
+				iosBuilder.addExtra(key, (Boolean) value);
+			}
+			else if (value instanceof JsonObject) {
+				iosBuilder.addExtra(key, (JsonObject) value);
+			}
+			else if (value instanceof String) {
+				iosBuilder.addExtra(key, (String) value);
+			}
+			else {
+				iosBuilder.addExtra(key, value.toString());
+			}
+		}
+	}
+
+	private void processAttributes(PushMessage message, AndroidNotification.Builder buideer) {
+		for (Map.Entry<String,Object> entry : message.getAttributes().entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			if (value instanceof Number) {
+				buideer.addExtra(key, (Number) value);
+			}
+			else if (value instanceof Boolean) {
+				buideer.addExtra(key, (Boolean) value);
+			}
+			else if (value instanceof JsonObject) {
+				buideer.addExtra(key, (JsonObject) value);
+			}
+			else if (value instanceof String) {
+				buideer.addExtra(key, (String) value);
+			}
+			else {
+				buideer.addExtra(key, value.toString());
+			}
+		}
+	}
+
+	private void doPush(PushPayload payload, PushResponseReceiver responseReceiver) {
+		if (payload == null) {
+			return;
+		}
+		PushResponse response = new PushResponse();
+		try {
+			PushResult result = pushClient.sendPush(payload);
+			response.setSuccess(result.isResultOK());
+		}
+		catch (APIConnectionException e) {
+			response.setSuccess(false);
+			response.setNetworkFailed(true);
+			response.setNetworkFailureReason(e.getMessage());
+		}
+		catch (APIRequestException e) {
+			response.setSuccess(false);
+			response.setErrorMessage(e.getErrorMessage());
+			response.setErrorCode(Integer.toString(e.getErrorCode()));
+		}
+		finally {
+			try {
+				if (responseReceiver != null) {
+					responseReceiver.onResponse(response);
+				}
+			}
+			catch (Throwable e) {
+				//ignore
+			}
+		}
+	}
+
 }
