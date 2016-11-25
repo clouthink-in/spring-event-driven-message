@@ -51,7 +51,7 @@ public class SmsSenderYunpianImpl implements SmsSender {
 	}
 
 	private void doSend(SmsMessage smsMessage, YunpianOptions options) {
-		Map<String,String> params = new HashMap<>();
+		Map<String,String> params = new HashMap<String,String>();
 		params.put("apikey", options.getKey());
 		params.put("tpl_id", options.getTemplateId());
 		params.put("tpl_value", smsMessage.getMessage());
@@ -67,7 +67,7 @@ public class SmsSenderYunpianImpl implements SmsSender {
 		try {
 			HttpPost method = new HttpPost(url);
 			if (paramsMap != null) {
-				List<NameValuePair> paramList = new ArrayList<>();
+				List<NameValuePair> paramList = new ArrayList<NameValuePair>();
 				for (Map.Entry<String,String> param : paramsMap.entrySet()) {
 					NameValuePair pair = new BasicNameValuePair(param.getKey(), param.getValue());
 					paramList.add(pair);

@@ -39,14 +39,14 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <daas.edm.version>1.0.0</daas.edm.version>
-
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>daas-edm</artifactId>
-            <version>${daas.edm.version}</version>
+            <version>1.0.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

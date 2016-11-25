@@ -12,10 +12,10 @@ So far the following version is available
 
 module name | latest version
 ------|------
-daas-edm|1.0.1
+daas-edm|1.0.2
 daas-edm-email|1.0.0
-daas-edm-push|1.0.0
-daas-edm-sms|1.1.0
+daas-edm-push|1.1.0
+daas-edm-sms|1.2.0
 
 ## Maven
 
