@@ -53,13 +53,13 @@ public class PushSenderJPushImpl implements PushSender {
 		this.receiver = receiver;
 	}
 
+    @Listenable
 	@Override
 	public void push(PushMessage message) {
 		//use the default receiver
 		push(message, receiver);
 	}
 
-	@Listenable
 	@Override
 	public void push(PushMessage message, PushResponseReceiver responseReceiver) {
 		if (message.getPushType() == null) {
