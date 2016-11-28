@@ -8,11 +8,9 @@ daas-edm.iml
 daas-edm-email.iml
 daas-edm-sms.iml
 daas-edm-push.iml
+daas-edm-project.iml
 
 *.class
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
 
 # Package Files #
 *.jar
